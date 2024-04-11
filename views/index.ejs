@@ -1,13 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cool Web Server</title>
-</head>
+<%- include("../partials/head.ejs") -%>
 <body>
     <h1>Welcome</h1>
     <p>This is a cool web server.</p>
+    <%- include("../partials/test.ejs") -%>
+    <%- include("../partials/test.ejs") -%>
+    <%- include("../partials/test.ejs") -%>
+    
+    <p>
+        This page has had <%= viewCount %> visitors
+    </p>
+
     <form action="/cool-form" method="post">
         <label for="username">Username:</label>
         <input type="text" name="username">
