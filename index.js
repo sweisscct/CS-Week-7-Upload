@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const path = require('path');
+const WebSocket = require('ws');
 
 // Specify the port on the command line
 const PORT = (process.argv[2] || 3000);
@@ -38,11 +39,9 @@ app.post("/wiki/:topic/new-section", (req, res) => {
     res.redirect(`/wiki/${topic}`);
 })
 
-
-
 app.get("/", (req, res) => {
     console.log("Yay! A new visitor!");
-    console.log(req);
+    // console.log(req);
     viewCount += 1;
     res.render("index.ejs", { viewCount } );
 });
@@ -83,6 +82,20 @@ app.post("/new-post", (req, res) => {
 
 
 
-app.listen(PORT, () => {
+const httpServer = app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });
+
+const wsServer = new WebSocket.Server( { noServer: true } );
+
+httpServer.on('upgrade', async (request, socket, head) => {
+    wsServer.handleUpgrade(request, socket, head, (ws) => {
+        wsServer.emit('connection', ws, request);
+    });
+});
+
+wsServer.on("connection", (ws) => {
+    ws.on("message", (message) => {
+        console.log(message.toLocaleString());
+    })
+})
