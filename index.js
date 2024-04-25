@@ -27,8 +27,15 @@ let WikiArticles = {
 }
 
 app.get("/wiki/:topic", (req, res) => {
-    if (WikiArticles[req.params.topic]) res.render("article", { article: WikiArticles[req.params.topic] });
+    const topic = req.params.topic;
+    if (WikiArticles[topic]) res.render("article", { article: WikiArticles[topic], topic });
     res.send("That page does not yet exist");
+})
+
+app.post("/wiki/:topic/new-section", (req, res) => {
+    const topic = req.params.topic;
+    WikiArticles[topic].push({ title: req.body.title, text: req.body.text });
+    res.redirect(`/wiki/${topic}`);
 })
 
 
