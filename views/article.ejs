@@ -1,0 +1,19 @@
+<%- include("../partials/head.ejs") -%>
+
+<body>
+    <% article.forEach(section => { %>
+        <h1><%= section.title %></h1>
+        <p><%= section.text %></p>
+    <% }) %>
+
+    <h1>Create New Post</h1>
+    <form action="/new-post" method="post">
+        <label for="title">Title</label>
+        <input type="text" name="title">
+        <label for="text">Post Text</label>
+        <!-- <input type="text" name="text"> -->
+        <textarea name="text"></textarea>
+        <button name="submit" type="submit">Make Post!</button>
+    </form>
+</body>
+</html>

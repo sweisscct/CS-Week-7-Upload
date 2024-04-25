@@ -1,13 +1,37 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
+const path = require('path');
 
-const PORT = 3000;
+// Specify the port on the command line
+const PORT = (process.argv[2] || 3000);
 app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
+app.use(express.static(path.join(__dirname, 'public')));
 
 let viewCount = 0;
+
+let BlogPosts = [
+    { title: "Cool title", text: "Some more cool text" },
+    { title: "Another post", text: "Yet more text" }
+]
+
+let WikiArticles = {
+    "cars" : [
+        { title: "Cars", text: "Aren't cars cool? Who doesn't like cars?"}
+    ],
+    "books" : [
+        { title: "Books", text: "Books are great! I need to read the ones I have before I get more though :("}
+    ]
+}
+
+app.get("/wiki/:topic", (req, res) => {
+    if (WikiArticles[req.params.topic]) res.render("article", { article: WikiArticles[req.params.topic] });
+    res.send("That page does not yet exist");
+})
+
+
 
 app.get("/", (req, res) => {
     console.log("Yay! A new visitor!");
@@ -40,6 +64,17 @@ app.post("/cool-form", (req, res) => {
     }
     res.send(`The username is: ${req.body.username} and the password is: ${req.body.password}`)
 });
+
+app.get("/blog", (req, res) => {
+    res.render("blog", { BlogPosts }); // BlogPosts: BlogPosts
+})
+
+app.post("/new-post", (req, res) => {
+    BlogPosts.push({ title: req.body.title, text: req.body.text });
+    res.redirect("/blog");
+});
+
+
 
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
