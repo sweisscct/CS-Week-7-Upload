@@ -80,6 +80,12 @@ app.post("/new-post", (req, res) => {
     res.redirect("/blog");
 });
 
+app.get("/chat/:username", (req, res) => {
+    console.log(req.query.sender)
+    console.log(req.params.username)
+    res.render("chat", { sender: req.query.sender, reciever: req.params.username, PORT });
+});
+
 
 
 const httpServer = app.listen(PORT, () => {
