@@ -17,21 +17,50 @@
         <input type="password" name="password">
         <input type="submit">
     </form>
-    <button id="message">Message Server</button>
+    <div id="new-message">
+
+    </div>
+
+    <textarea name="new-chat" id="new-chat"></textarea>
+
+    <button id="message">Send Message</button>
 </body>
 sc
 <!-- <script type="text/javascript" src="../script.js"></script> -->
 <script>
-    const url = "ws://localhost:3123";
-const wsServer = new WebSocket(url);
+    const userName = prompt("What is your username?");
+    const url = "ws://localhost:<%= PORT %>";
+    const wsServer = new WebSocket(url);
+    
 
-function sendMessage() {
-    wsServer.send("Test message from client");
-}
-const button = document.getElementById("message");
-button.addEventListener("click", () => {
-    sendMessage();
-})
+
+    const newChat = document.getElementById("new-chat");
+    function sendMessage() {
+        console.log(newChat.value)
+        if (newChat.value) {
+            wsServer.send(`${userName}:\n${newChat.value}`);
+            newChat.value = "";
+        }
+    }
+
+    const button = document.getElementById("message");
+    button.addEventListener("click", () => {
+        sendMessage();
+    })
+
+    const messageContainer = document.getElementById("new-message");
+
+    function displayMessage(message) {
+        let newMessage = document.createElement("p");
+        newMessage.innerText = message;
+        messageContainer.appendChild(newMessage);
+    }
+
+    wsServer.onmessage = (event) => {
+        const { data } = event;
+        console.log(data);
+        displayMessage(data);
+    }
 
 </script>
 </html>

@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
     console.log("Yay! A new visitor!");
     // console.log(req);
     viewCount += 1;
-    res.render("index.ejs", { viewCount } );
+    res.render("index.ejs", { viewCount, PORT } );
 });
 
 app.get("/parsing/:display", (req, res) => {
@@ -96,6 +96,11 @@ httpServer.on('upgrade', async (request, socket, head) => {
 
 wsServer.on("connection", (ws) => {
     ws.on("message", (message) => {
+        console.log(message);
         console.log(message.toLocaleString());
+
+        wsServer.clients.forEach(client => {
+            if (client.readyState == WebSocket.OPEN) client.send(message.toLocaleString());
+        })
     })
 })
