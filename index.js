@@ -11,7 +11,10 @@ const passport = require('passport');
 const session = require('session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
-
+// import our new Schema
+const { Chat, User } = require('./mongoSchema');
+// const mongoSchema = require('./mongoSchema');
+// const Chat = mongoSchema.Chat;
 
 // Specify the port on the command line
 const PORT = (process.argv[2] || 3000);
@@ -25,7 +28,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: new MongoDBStore({
-        mongoUrl: '127.0.0.1:127017',
+        mongoUrl: '127.0.0.1:27017',
         collection: 'chatSessions',
     }, err=> console.log(err))
 }));
@@ -54,6 +57,45 @@ let WikiArticles = {
         { title: "Books", text: "Books are great! I need to read the ones I have before I get more though :("}
     ]
 }
+
+app.get("/login", (req, res) => {
+    if (req.isAuthenticated()) res.redirect("/chat");
+    res.render("login");
+});
+
+app.post('/login', passport.authenticate('local', {failureRedirect: '/login', failureFlash: true}), (req, res) => {
+    res.redirect("chat");
+});
+
+app.get('/logout', (req, res) => {
+    req.logout(err => {
+        if (err) console.log(err);
+        res.redirect("/");
+    });
+});
+
+app.get('/create-account', (req, res) => {
+    if (req.isAuthenticated()) res.redirect("/chat");
+    res.render("create-account");
+})
+
+app.post('/create-account', (req, res) => {
+    if (req.isAuthenticated()) res.redirect("/chat");
+    User.create({
+        name: req.body.name,
+        username: req.body.username,
+        dateCreated: new Date()
+    }).then(newUser => newUser.setPassword(req.body.password, () => newUser.save()));
+    res.redirect("/chat");
+});
+
+app.get("/chat", (req, res) => {
+    if (!req.isAuthenticated()) res.redirect("/login");
+    res.render("chat-selection");
+})
+
+
+
 
 app.get("/wiki/:topic", (req, res) => {
     const topic = req.params.topic;
