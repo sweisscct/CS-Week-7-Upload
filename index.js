@@ -30,7 +30,13 @@ app.use(session({
     }, err=> console.log(err))
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+const LocalStrategy = require('passport-local').Strategy;
+passport.use(new LocalStrategy(User.authenticate()));
 
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 
 let viewCount = 0;
