@@ -4,12 +4,34 @@ const ejs = require("ejs");
 const path = require('path');
 const WebSocket = require('ws');
 
+// Hashing and salting of stored passwords
+const passport = require('passport');
+
+// Manage authentication and user sessions
+const session = require('session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+
+
+
 // Specify the port on the command line
 const PORT = (process.argv[2] || 3000);
 app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: false,
+    store: new MongoDBStore({
+        mongoUrl: '127.0.0.1:127017',
+        collection: 'chatSessions',
+    }, err=> console.log(err))
+}));
+
+
+
 
 let viewCount = 0;
 

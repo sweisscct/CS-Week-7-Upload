@@ -4,8 +4,10 @@ const wsServer = new WebSocket(url);
 function sendMessage() {
     wsServer.send("Test message from client");
 }
-
-sendMessage();
+const button = document.getElementById("message");
+button.addEventListener("click", () => {
+    sendMessage();
+})
 
 // function messageGenerator(message, from) {
 

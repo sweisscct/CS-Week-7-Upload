@@ -20,18 +20,18 @@
     <button id="message">Message Server</button>
 </body>
 sc
-<!-- <script type="text/javascript" src="../script.js"></script> -->
+<script type="text/javascript" src="/script.js"></script>
 <script>
-    const url = "ws://localhost:3123";
-const wsServer = new WebSocket(url);
+//     const url = "ws://localhost:3123";
+// const wsServer = new WebSocket(url);
 
-function sendMessage() {
-    wsServer.send("Test message from client");
-}
-const button = document.getElementById("message");
-button.addEventListener("click", () => {
-    sendMessage();
-})
+// function sendMessage() {
+//     wsServer.send("Test message from client");
+// }
+// const button = document.getElementById("message");
+// button.addEventListener("click", () => {
+//     sendMessage();
+// })
 
 </script>
 </html>
