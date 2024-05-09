@@ -1,0 +1,11 @@
+<%- include("../partials/head.ejs") -%>
+<body>
+    <% users.forEach(user => { %>
+        <p>
+            <a href="/chat/<%= user.username %>">
+                <%= user.username %>
+            </a>
+        </p>
+    <% }) %>
+</body>
+</html>

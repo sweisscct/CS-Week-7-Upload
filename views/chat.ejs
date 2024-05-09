@@ -1,7 +1,13 @@
 <%- include("../partials/head.ejs") -%>
 <body>
-    <div id="new-message">
-
+    <div id="chat-container">
+        <% chats.forEach(chat => { %>
+            <div class="chat">
+                <p>Sender: <%= chat.sender %></p>
+                <p>Reciever: <%= chat.reciever %></p>
+                <p><%= chat.text %></p>
+            </div>
+        <% }) %>
     </div>
 
     <textarea name="new-chat" id="new-chat"></textarea>
@@ -36,18 +42,31 @@
         sendMessage();
     })
 
-    const messageContainer = document.getElementById("new-message");
+    const chatContainer = document.getElementById("chat-container");
 
-    function displayMessage(message) {
-        let newMessage = document.createElement("p");
-        newMessage.innerText = message;
-        messageContainer.appendChild(newMessage);
+    function displayChat(chat) {
+        let newSender = document.createElement("p");
+        newSender.innerText = `Sender: ${chat.sender}`;
+
+        let newReciever = document.createElement("p");
+        newReciever.innerText = `Reciever: ${chat.reciever}`;
+
+        let newText = document.createElement("p");
+        newText.innerText = `${chat.text}`;
+
+        let newChatDiv = document.createElement('div');
+        newChatDiv.setAttribute({class: 'chat'});
+        newChatDiv.appendChild(newSender);
+        newChatDiv.appendChild(newReciever);
+        newChatDiv.appendChild(newText);
+
+        chatContainer.appendChild(newChatDiv);
     }
 
     wsServer.onmessage = (event) => {
         const { data } = event;
         console.log(data);
-        displayMessage(data);
+        displayChat(chat);
     }
 
 </script>

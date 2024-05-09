@@ -8,7 +8,8 @@ const WebSocket = require('ws');
 const passport = require('passport');
 
 // Manage authentication and user sessions
-const session = require('session');
+const session = require('express-session');
+
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 // import our new Schema
@@ -86,15 +87,27 @@ app.post('/create-account', (req, res) => {
         username: req.body.username,
         dateCreated: new Date()
     }).then(newUser => newUser.setPassword(req.body.password, () => newUser.save()));
+    passport.authenticate('local', {failureRedirect: '/login', failureFlash: true});
+    console.log(req.session.passport);
     res.redirect("/chat");
 });
 
 app.get("/chat", (req, res) => {
-    if (!req.isAuthenticated()) res.redirect("/login");
-    res.render("chat-selection");
+    // if (!req.isAuthenticated()) res.redirect("/login");
+    User.find().exec().then(users => res.render("chat-selection", { users }));
 })
 
-
+app.get("/chat/:username", (req, res) => {
+    console.log(req.query.sender)
+    console.log(req.params.username)
+    Chat.find({ $or: [ {$and:[ {sender: req.session.passport.user}, {reciever: req.params.username } ]}, {$and:[{ sender: req.params.username }, {reciever: req.session.passport.user } ]} ] })
+    .exec().then(results => {
+        const chats = results.sort((a, b) => {
+            return new Date(b.dateCreated) - new Date(a.dateCreated);
+        });
+    })
+    res.render("chat", { sender: req.query.sender, reciever: req.params.username, PORT, chats });
+});
 
 
 app.get("/wiki/:topic", (req, res) => {
@@ -150,11 +163,7 @@ app.post("/new-post", (req, res) => {
     res.redirect("/blog");
 });
 
-app.get("/chat/:username", (req, res) => {
-    console.log(req.query.sender)
-    console.log(req.params.username)
-    res.render("chat", { sender: req.query.sender, reciever: req.params.username, PORT });
-});
+
 
 
 
