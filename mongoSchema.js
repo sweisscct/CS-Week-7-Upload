@@ -8,7 +8,6 @@ const Schema = mongoose.Schema;
 const chatSchema = new Schema({
     sender: String,
     reciever: String,
-    _id: String,
     dateCreated: Date,
     text: String
 });

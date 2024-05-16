@@ -36,12 +36,14 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-const LocalStrategy = require('passport-local').Strategy;
-passport.use(new LocalStrategy(User.authenticate()));
+
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+// Move this here
+const LocalStrategy = require('passport-local').Strategy;
+passport.use(new LocalStrategy(User.authenticate()));
 
 let viewCount = 0;
 
@@ -82,31 +84,40 @@ app.get('/create-account', (req, res) => {
 
 app.post('/create-account', (req, res) => {
     if (req.isAuthenticated()) res.redirect("/chat");
-    User.create({
+    User.register(new User({ // change from create
         name: req.body.name,
         username: req.body.username,
         dateCreated: new Date()
-    }).then(newUser => newUser.setPassword(req.body.password, () => newUser.save()));
-    passport.authenticate('local', {failureRedirect: '/login', failureFlash: true});
-    console.log(req.session.passport);
-    res.redirect("/chat");
+    }), req.body.password, (err, user) => {
+        if (err) {
+            console.log(err);
+            res.send(err);
+        }
+        passport.authenticate('local')(req, res, () => {
+            console.log(req.session.passport);
+            res.redirect("/chat");
+        })
+    })
 });
 
 app.get("/chat", (req, res) => {
-    // if (!req.isAuthenticated()) res.redirect("/login");
-    User.find().exec().then(users => res.render("chat-selection", { users }));
+    if (!req.isAuthenticated()) res.redirect("/login");
+    User.find({"username": {$ne: req.session.passport.user}}).exec().then(users => res.render("chat-selection", { users }));
 })
 
 app.get("/chat/:username", (req, res) => {
-    console.log(req.query.sender)
+    console.log(req.session.passport.user)
     console.log(req.params.username)
+    // let chats;
     Chat.find({ $or: [ {$and:[ {sender: req.session.passport.user}, {reciever: req.params.username } ]}, {$and:[{ sender: req.params.username }, {reciever: req.session.passport.user } ]} ] })
     .exec().then(results => {
-        const chats = results.sort((a, b) => {
-            return new Date(b.dateCreated) - new Date(a.dateCreated);
+        chats = results.sort((a, b) => {
+            return new Date(a.dateCreated) - new Date(b.dateCreated);
         });
-    })
-    res.render("chat", { sender: req.query.sender, reciever: req.params.username, PORT, chats });
+        console.log(chats)
+        res.render("chat", { sender: req.session.passport.user, reciever: req.params.username, PORT, chats });
+    });
+
 });
 
 
@@ -181,11 +192,18 @@ httpServer.on('upgrade', async (request, socket, head) => {
 
 wsServer.on("connection", (ws) => {
     ws.on("message", (message) => {
-        console.log(message);
-        console.log(message.toLocaleString());
-
-        wsServer.clients.forEach(client => {
-            if (client.readyState == WebSocket.OPEN) client.send(message.toLocaleString());
+        // console.log(message);
+        // console.log(message.toLocaleString());
+        message = JSON.parse(message.toLocaleString());
+        Chat.create({
+            sender: message.sender,
+            reciever: message.reciever,
+            text: message.message,
+            dateCreated: new Date()
+        }).then(() => {
+            wsServer.clients.forEach(client => {
+                if (client.readyState == WebSocket.OPEN) client.send(JSON.stringify(message));
+            })
         })
     })
 })

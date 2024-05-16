@@ -1,13 +1,13 @@
 <%- include("../partials/head.ejs") -%>
 <body>
     <div id="chat-container">
-        <% chats.forEach(chat => { %>
+        <% if (chats) {chats.forEach(chat => { %>
             <div class="chat">
                 <p>Sender: <%= chat.sender %></p>
                 <p>Reciever: <%= chat.reciever %></p>
                 <p><%= chat.text %></p>
             </div>
-        <% }) %>
+        <% })} %>
     </div>
 
     <textarea name="new-chat" id="new-chat"></textarea>
@@ -15,10 +15,12 @@
     <button id="message">Send Message</button>
 </body>
 <script>
-    if (window.location.href == "http://localhost:<%= PORT %>/chat/<%= reciever %>") {
-        const userName = prompt("What is your username?");
-        window.location.replace("http://localhost:<%= PORT %>/chat/<%= reciever %>?sender=" + userName);
-    }
+    // if (window.location.href == "http://localhost:<%= PORT %>/chat/<%= reciever %>") {
+    //     const userName = prompt("What is your username?");
+    //     window.location.replace("http://localhost:<%= PORT %>/chat/<%= reciever %>?sender=" + userName);
+    // }
+    const sender = "<%= sender %>";
+    const reciever = "<%= reciever %>";
 
     const url = "ws://localhost:<%= PORT %>";
     const wsServer = new WebSocket(url);
@@ -52,10 +54,10 @@
         newReciever.innerText = `Reciever: ${chat.reciever}`;
 
         let newText = document.createElement("p");
-        newText.innerText = `${chat.text}`;
+        newText.innerText = `${chat.message}`;
 
         let newChatDiv = document.createElement('div');
-        newChatDiv.setAttribute({class: 'chat'});
+        newChatDiv.setAttribute("class", "chat");
         newChatDiv.appendChild(newSender);
         newChatDiv.appendChild(newReciever);
         newChatDiv.appendChild(newText);
@@ -66,7 +68,7 @@
     wsServer.onmessage = (event) => {
         const { data } = event;
         console.log(data);
-        displayChat(chat);
+        displayChat(JSON.parse(data));
     }
 
 </script>
